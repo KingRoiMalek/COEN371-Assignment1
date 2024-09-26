@@ -86,10 +86,10 @@ void Application::initialiseScene() {
 	xAxis = new Arrow(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), 2.5f);
 	yAxis = new Arrow(glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), 2.5f);
 	zAxis = new Arrow(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), 2.5f);
-	clusters = new Cluster[5];
+	clusters = new Cluster[1];
 	model = new Model("resources/models/model.obj", glm::vec4(1.0f, 0.498f, 0.498f, 1.0f), glm::vec3(5.0f, 0.0f, -5.0f), glm::vec2(0.0f, glm::radians(150.0f)), 2.5f);
-	walls = new Wall * [5];
-	for (int i = 0; i < 5; i += 1) {
+	walls = new Wall * [1];
+	for (int i = 0; i < 1; i += 1) {
 		clusters[i].setPosition(INITIAL_CLUSTER_POSITIONS[i]);
 		walls[i] = new Wall(&clusters[i], INITIAL_WALL_POSITIONS[i]);
 	}
@@ -105,6 +105,7 @@ void Application::initialiseScene() {
 	shaderMan->setUniform("projection", "quad", ortho);
 	hyperCube = new Quad(glm::vec2(0, 300), glm::vec2(368, 58), glm::vec2(0.0475, 0.05), glm::vec2(0.5075, 0.1225));
 	gameOver = new Quad(glm::vec2(0, 0), glm::vec2(313, 50), glm::vec2(0.55875, 0.05125), glm::vec2(0.95, 0.11375));
+	//pause = new Quad(glm::vec2(0, 0), glm::vec2(313, 50), glm::vec2(0.55875, 0.05125), glm::vec2(0.95, 0.11375));
 	getStarted = new Quad(glm::vec2(0, -300), glm::vec2(411, 30), glm::vec2(0.04375, 0.14125), glm::vec2(0.5575, 0.17875));
 	_score = new Quad(glm::vec2(-400, 340), glm::vec2(151, 38), glm::vec2(0.62875, 0.14125), glm::vec2(0.8175, 0.18875));
 	_timer = new Quad(glm::vec2(350, 340), glm::vec2(139, 36), glm::vec2(0.73, 0.22875), glm::vec2(0.90375, 0.27375));
@@ -162,7 +163,7 @@ void Application::initialiseTextures() {
 	textureMan = new TextureManager();
 	textureMan->loadTexture("brick", GL_TEXTURE_2D, "resources/textures/brick.png");
 	textureMan->bindTextureToUnit(1, "brick");
-	textureMan->loadTexture("tile", GL_TEXTURE_2D, "resources/textures/tile.png");
+	textureMan->loadTexture("tile", GL_TEXTURE_2D, "resources/textures/moon.jpg");
 	textureMan->bindTextureToUnit(2, "tile");
 	textureMan->loadTexture("metal", GL_TEXTURE_2D, "resources/textures/metal.jpg");
 	textureMan->bindTextureToUnit(3, "metal");
@@ -176,6 +177,8 @@ void Application::initialiseTextures() {
 	textureMan->bindTextureToUnit(4, "shadowMap");
 	textureMan->loadTexture("atlas", GL_TEXTURE_2D, "resources/textures/atlas.png");
 	textureMan->bindTextureToUnit(5, "atlas");
+	textureMan->loadTexture("space", GL_TEXTURE_2D, "resources/textures/space.jpg");
+	textureMan->bindTextureToUnit(6, "space");
 	shaderMan->setUniform("textureSampler", "quad", 4);
 }
 void handleInput(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -205,6 +208,19 @@ void handleInput(GLFWwindow* window, int key, int scancode, int action, int mods
 			application->clusterRotationVector.x += glm::radians(90.0f);
 		}
 	}
+
+	// Pause screen handler
+	if (key == GLFW_KEY_BACKSPACE && action == GLFW_RELEASE) {
+		if (!application->paused) {
+			application->state = PAUSE_SCREEN;
+			application->paused = true;
+		}
+		else {
+			application->state = GAME_SCREEN;
+			application->paused = false;
+		}
+	}
+	
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, true);
 	}
@@ -238,53 +254,21 @@ void handleInput(GLFWwindow* window, int key, int scancode, int action, int mods
 	//if (!application->enableSmoothMoves && key == GLFW_KEY_W && action == GLFW_PRESS) {
 	//	application->clusters[application->currentCluster].position.z += 1.0f;
 	//}
-	//if (!application->enableSmoothMoves && key == GLFW_KEY_A && action == GLFW_PRESS) {
-	//	// Rotation occurs if the CAPS LOCK key is currently active.
-	//	if (mods & GLFW_MOD_CAPS_LOCK) {
-	//		application->clusters[application->currentCluster].position.x -= 1.0f;
-	//	}
-	//	else {
-	//		switch (application->rotationMode) {
-	//		case ROTATE_X:
-	//			application->clusters[application->currentCluster].rotation.x -= glm::radians(5.0f);
-	//			break;
-	//		case ROTATE_Y:
-	//			application->clusters[application->currentCluster].rotation.y -= glm::radians(5.0f);
-	//			break;
-	//		case ROTATE_Z:
-	//			application->clusters[application->currentCluster].rotation.z -= glm::radians(5.0f);
-	//			break;
-	//		}
-	//	}
-	//}
+	if (!application->enableSmoothMoves && key == GLFW_KEY_A && action == GLFW_PRESS) {
+		application->clusters[application->currentCluster].position.x -= 1.0f;
+	}
 	//if (!application->enableSmoothMoves && key == GLFW_KEY_S && action == GLFW_PRESS) {
 	//	application->clusters[application->currentCluster].position.z -= 1.0f;
 	//}
-	//if (!application->enableSmoothMoves && key == GLFW_KEY_D && action == GLFW_PRESS) {
-	//	// Rotation occurs if the CAPS LOCK key is currently active.
-	//	if (mods & GLFW_MOD_CAPS_LOCK) {
-	//		application->clusters[application->currentCluster].position.x += 1.0f;
-	//	}
-	//	else {
-	//		switch (application->rotationMode) {
-	//		case ROTATE_X:
-	//			application->clusters[application->currentCluster].rotation.x += glm::radians(5.0f);
-	//			break;
-	//		case ROTATE_Y:
-	//			application->clusters[application->currentCluster].rotation.y += glm::radians(5.0f);
-	//			break;
-	//		case ROTATE_Z:
-	//			application->clusters[application->currentCluster].rotation.z += glm::radians(5.0f);
-	//			break;
-	//		}
-	//	}
-	//}
-	// Because the numerical keys are defined sequentially, this logic can be greatly simplified.
-	if (key >= GLFW_KEY_1 && key <= GLFW_KEY_5 && action == GLFW_PRESS) {
-		application->currentCluster = key - GLFW_KEY_1;
+	if (!application->enableSmoothMoves && key == GLFW_KEY_D && action == GLFW_PRESS) {
+		application->clusters[application->currentCluster].position.x += 1.0f;
 	}
+	// Because the numerical keys are defined sequentially, this logic can be greatly simplified.
+	/*if (key >= GLFW_KEY_1 && key <= GLFW_KEY_5 && action == GLFW_PRESS) {
+		application->currentCluster = key - GLFW_KEY_1;
+	}*/
 	if (key == GLFW_KEY_H && action == GLFW_PRESS) {
-		for (int i = 0; i < 5; i += 1) {
+		for (int i = 0; i < 1; i += 1) {
 			application->clusters[i].cubes.clear();
 			application->clusters[i].generateCluster();
 			application->walls[i] = new Wall(&application->clusters[i], application->INITIAL_WALL_POSITIONS[i]);
@@ -371,7 +355,7 @@ void Application::render() {
 	glCullFace(GL_BACK);
 	shaderMan->setUniform("enableShadows", "texture", enableShadows);
 	shaderMan->setUniform("enableTextures", "texture", enableTextures);
-	for (int i = 0; i < 5; i += 1) {
+	for (int i = 0; i < 1; i += 1) {
 		shaderMan->setUniform("textureSampler", "texture", 2);
 		shaderMan->setUniform("specularStrength", "texture", 0.6f);
 		clusters[i].render(shaderMan, "texture");
@@ -382,8 +366,22 @@ void Application::render() {
 		walls[i]->render();
 	}
 
+	// Create the sky cube around the grid
+	glDisable(GL_CULL_FACE);
+	Cube* skyCube = new Cube(glm::vec4(96.0f, 96.0f, 96.0f, 0.5f), glm::vec3(0.0f, 0.0f, 0.0f));
+	const glm::mat4 i = glm::mat4(1.0f);
+	glm::mat4 transform =
+		glm::translate(i, glm::vec3(0.0f, 0.0f, 0.0f)) * 
+		glm::scale(glm::mat4(1.0f), glm::vec3(100.0f, 100.0f, 100.0f)) *
+		glm::translate(i, skyCube->position);
+	shaderMan->setUniform("object", "texture", transform);
+	shaderMan->setUniform("textureSampler", "texture", 6);
+	skyCube->render();
+	delete skyCube;
+	glEnable(GL_CULL_FACE);
+
 	shaderMan->setUniform("object", "basic", glm::translate(glm::mat4(1.0f), lightCube->position));
-	lightCube->render();
+	//lightCube->render();
 	shaderMan->setUniform("object", "basic", glm::mat4(1.0f));
 	// The depth test is disabled for the axises to allow them to be drawn ontop of everything else.
 	glDisable(GL_DEPTH_TEST);
@@ -405,6 +403,8 @@ void Application::render() {
 		break;
 	case LOSS_SCREEN:
 		gameOver->render(shaderMan, "quad");
+	case PAUSE_SCREEN:
+		//pause->render(shaderMan, "quad");
 	case GAME_SCREEN:
 		_score->render(shaderMan, "quad");
 		_timer->render(shaderMan, "quad");
@@ -430,7 +430,7 @@ void Application::renderShadowMap() {
 	shaderMan->setUniform("object", "shadow", glm::mat4(1.0f));
 	grid->render();
 	model->render(shaderMan, "shadow");
-	for (int i = 0; i < 5; i += 1) {
+	for (int i = 0; i < 1; i += 1) {
 		clusters[i].render(shaderMan, "shadow");
 		glm::mat4 wallTransform = glm::translate(glm::mat4(1.0f), walls[i]->position);
 		shaderMan->setUniform("object", "shadow", wallTransform);

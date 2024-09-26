@@ -19,11 +19,11 @@ const vec3 lightColor = vec3(1.0f, 1.0f, 1.0f);
 
 void main()
 {
-	float ambientStrength = 0.5f;
+	float ambientStrength = 1.5f;
 	vec3 ambient = ambientStrength * lightColor;
 	
 	vec3 lightDirection = normalize(fragPosition - lightPosition);
-	float lightSourceDistanceFactor = pow(length(fragPosition - lightPosition), 2) / 200.0f;
+	float lightSourceDistanceFactor = pow(length(fragPosition - lightPosition), 1) / 8.0f;
 	float diffuseFactor = max(dot(normalize(vertNormal), lightDirection), 0.0f) * 0.3f;
 	vec3 diffuse = diffuseFactor * lightColor;
 	

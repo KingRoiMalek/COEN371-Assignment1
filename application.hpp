@@ -24,6 +24,7 @@ enum RotationMode {
 enum ScreenState {
 	TITLE_SCREEN,
 	GAME_SCREEN,
+	PAUSE_SCREEN,
 	LOSS_SCREEN
 };
 class Application {
@@ -76,10 +77,12 @@ public:
 	bool enableShadows = true;
 	bool enableSmoothMoves = false;
 	bool clusterPassedWall = true;
+	bool paused = false;
 public:
 	Quad* hyperCube;
 	Quad* gameOver;
 	Quad* getStarted;
+	Quad* pause;
 	Quad* _score;
 	Quad* _timer;
 	Quad* instructions;
